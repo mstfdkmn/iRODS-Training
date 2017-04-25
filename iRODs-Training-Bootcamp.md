@@ -76,10 +76,7 @@ cat /home/ubuntu/.irods/irods_environment.json
 
 The file contains the minimal information for a session.
 
-With ```
-iuserinfo
-```
-command you can retrieve information on your account.
+With `iuserinfo` command you can retrieve information on your account.
 
 ```
 name: di4r-user1
@@ -106,6 +103,7 @@ ihelp
 
 
 ### The working directory
+
 With the command 
 ```
 ils
@@ -120,6 +118,7 @@ we can check whether there is data in our iRODS-home directory
 - `/home/<user>`: your default working directory 
 
 ### iCommands
+
 iRODS command line equivalent to standard Unix operations
 
 - ils
@@ -132,7 +131,9 @@ iRODS command line equivalent to standard Unix operations
 - irepl
 
 ## Data up and download (20 minutes)
+
 ### Create data
+
 Open a file with `nano` on the linux filesystem
 
 ```
@@ -140,6 +141,7 @@ nano <filename>
 ```
 
 ### Data upload
+
 With the linux command `ls` you can check that the file has been created and is accessible on the User Interface machine:
 
 ```
@@ -173,6 +175,7 @@ irm <filename>
 ```
 
 ### Connection between logical and physical namespace
+
 iRODS provides an abstraction from the physical location of the files. I.e. `/aliceZone/home/rods/test.txt` is the logical path which only iRODS knows. But where is the file actually on the server that hosts iRODS?
 
 
@@ -187,6 +190,7 @@ Aha, what does this mean?
 The file `test.txt` that we uploaded is known in iRODS as `/eveZone/home/di4r-user1/test.txt`. It is owned by the user `di4r-user1` and lies on the storage resource `demoResc` and there is no other replica of that file in the iRODS system (0 in front of 'demoResc'). The size of the file is 57KB. It is stored with a time stamp and a checksum (1518e4...84ae). Actually, the checksum calculation was triggered by the option '-K' of the `iput` command.
 
 ### Data download
+
 We deleted our local copy of our test file and want to restore it. We can download the version stored in iRODS with:
 
 ```
@@ -198,11 +202,13 @@ We downloaded test.txt and renamed our local copy to test-restore.txt. With the 
 **Note,** iRODS can be used as external storage service, we can store extra system information, i.e. checksums which are used to verify data integrity upon data moving.
 
 ### Small exercise:
+
 - Store the German version of Alice in wonderland `aliceInWonderland-DE.txt.utf-8` on iRODS.
 - Verify that the checksum in iRODS is the same as for your local file. You can calculate the checksum in linux with `md5sum aliceInWonderland-DE.txt.utf-8`.
 
 
 ## Structuring data in iRODS (20 minutes)
+
 On a normal PC you would create folder structures to keep the overview over your data. In iRODS you can also create folders, however, they are called collections.
 
 In iRODS you have the commands `imkdir` and `imv`.
@@ -245,9 +251,11 @@ iput -K -r aliceInWonderland lewiscarroll/book-aliceInWonderland
 We need to use the flag `-r` for recursive upload and we gave a different name to the folder in iRODS.
 
 ### Small exercise
+
 - Move the German version of Alice in Wonderland to the sub collection 'book-aliceInWonderland'.
 
 ### Working directory
+
 All data that you uploaded so far went automatically to the logical iRODS collection '/eveZone/home/di4r-user1'. Why is that?
 
 You have a command
@@ -265,6 +273,7 @@ icd lewiscarroll
 ```
 
 ### Small exercise:
+
 - What happens in the following two lines?
 
  ``` 
@@ -278,6 +287,7 @@ icd lewiscarroll
 - Remove test-restore.txt from iRODS (but not from your linux home!)
 
 ## Exercise: Moving data in iRODS (10 minutes)
+
 1. Create a new collection for another author under you iRODS home collection.
 2. Add a file from 'gutenberg.org' to the new collection.
  Download a file to your linux account:
@@ -292,6 +302,7 @@ icd lewiscarroll
 
 
 ## Access control and data sharing (20min)
+
 **THIS PART TO BE REMOVED**
 
 Check the current access of your data with
@@ -359,6 +370,8 @@ ils -A -r lewiscarroll
 Only the newly placed file will inherit the ACLs from the folder. Old data will keep their ACLs.
 
 ### Small exercise
+
+
 1. Pair up with another team.
 2. Make one of your collections or subcollections accessible to other team
 3. Switch on the inheritance
@@ -366,11 +379,13 @@ Only the newly placed file will inherit the ACLs from the folder. Old data will 
 5. Use `iget` and try to download the data your partnering team gave access to  
 
 ## Metadata (30 minutes)
+
 In the previous section we up and downloaded data to an iRODS server and set permissions. So far it is nothig special compared to a normal (unix) filesystem apart from the strange commands.
 
 What does iRODS offer to the user that exceeds such functionality?
 
 ### Create Attribute, Value, Unit triples
+
 We can annotate files with so-called AVUs triples. These triples are added to a database and are searchable, e.g. you can ask the iRODS system give me all data (files and collections) whose author is "Alice" and which were created in 2016.
 
 First we will explore how to create these cues for which we can search later.
@@ -393,6 +408,7 @@ First we will explore how to create these cues for which we can search later.
  ```
  
 ### List metadata
+
 To list metadata do:
 
 ```
@@ -407,6 +423,7 @@ imeta ls -C lewiscarroll
 With `imeta ls` you can retrieve the AVUs when given a file or collection name. In the next Section we will see how we can retrieve the file and folder names when given an attribute or value.
 
 ### Exercise: Create Metadata (15min)
+
 1. Create the author Bob for the file test.txt
 2. Inspect the list of AVUs
 3. Add a new triple 'distance' '36' 'miles' 
@@ -422,6 +439,7 @@ Collapses all metadata entries with the same key to one with the new value.
 
 
 ### Queries for data
+
 Previously we calculated a checksum. The checksum was stored in the iCAT metadata catalogue but we cannot fish it out with `imeta`. 
 To query the iCAT metadata catalogue we need another command, the `iquest` command.
 
@@ -464,6 +482,7 @@ The most important ones are listed on your cheat-sheet.
 You might see that you get as a result several files. These are the files of your fellow course members. You can see and query the metadata pf these files and collections because you do have the correct ACLs.
 
 ### Small exercise
+
 Command 	| Meaning
 ---------|--------
 iquest		| Find data by query on metadata
@@ -478,9 +497,11 @@ What does the team have to do to make you and only you see the metadata?
 - Do the permissions of the files have any influence on the metadata search?
 
 ## Exercise: Find the easter bunny (20 min)
+
 - In the system there are some clues under the attribute 'Easter'. Gather the clues and download the easter bunny. 
 
 ## iRODS resources (30 minutes, optional)
+
 (Note: commands and resource hierarchies are still todo)
 
 With the command `ils -L` we explored the link between the iRODS logical namespace and the the physical location of files and folders. The same is done with resources.
@@ -518,6 +539,7 @@ BIG advantage: As a user you do not need to know which storage medium is hidden 
 icommands to steer your data movements in the backend.
 
 ### User defined replication of data
+
 Once your data is lying in iRODS you can also replicate your data to another predefined resource.
 Use `irepl` to replicate the German version of Alice in Wonderland to storage3
 
@@ -556,10 +578,12 @@ irm testfile.txt
 all replicas will be removed. The filename will only be removed from the logical namespace if there is no replica left.
 
 ### Small exercise
+
 1. Replicate a file to three different resources
 2. Explore `itrim` and trim the number of replicas to 1 (1 original and 1 replica)
 
 ### Resources have a life of their own
+
 In iRODS the system admin can group resources and enforce certain data replication or copying policies.
 
 - Round Robin
@@ -570,6 +594,7 @@ ils -L testfile-on-rr.txt
 ```
 
 ### Small exercise
+
 - Where is your data stored physically. 
 - Where is your neighbours data stored?
 - Upload several files after each other. Where does the data land physically?
