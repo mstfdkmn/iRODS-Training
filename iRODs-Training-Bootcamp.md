@@ -1,10 +1,10 @@
 # iRODS training (2 hours)
 ## Connect to iRODS (10 minutes)
 Goal: We will see how to connect to an iRODS instance and will have a look at the environment.
-Login to your Lisa account (sdemo_XXX accounts). 
+Login to your Lisa account (sdemo_\<XXX> accounts). 
 
 ```
-ssh sdemo_XXX@lisa.surfsara.nl
+ssh sdemo_<XXX>@lisa.surfsara.nl
 ```
 
 Then load the icommands module on Lisa. This module provides the commandline tool s with which you can connect to iRODS, send data to and download from iRODS etc.
@@ -29,35 +29,46 @@ Enter the port number: 1247
 Enter your irods user name: <irodsuser>
 Enter your irods zone: <zonename>
 ```
+- For **host name (DNS) of the server** use: **145.100.58.46**
+- For **port number** use: **1247**
+- For **irods user name** use: **di4r-user\<X>**
+- For **irods zone** use: **eveZone**
 
-Provide your password and .. there you are
+
+Provide your password and .. there you are logged in.
+
+If you are logging-in for the second time, you only need to provide your password to connect to the iRODS zone.
 
 ### Environment
 
 With the command
-
 ```
 ienv
 ```
 you can check how the iRODS zone is composed
+**CHANGE THE narges USER with sdemo USERS and correct the path**
 
 ```
-NOTICE: Release Version = rods4.1.9, API Version = d
+NOTICE: Release Version = rods4.1.10, API Version = d
 NOTICE: irods_session_environment_file - 
-	/home/ubuntu/.irods/irods_environment.json.22864
-NOTICE: irods_user_name - rods
-NOTICE: irods_host - 145.100.59.37
+	/home/narges/.irods/irods_environment.json.10301
+NOTICE: irods_user_name - di4r-user1
+NOTICE: irods_host - 145.100.58.46
 ...
 NOTICE: irods_port - 1247
 ...
-NOTICE: irods_zone_name - aliceZone
+NOTICE: irods_zone_name - eveZone
+NOTICE: irods_client_server_policy is not defined
+NOTICE: irods_client_server_negotiation is not defined
 ...
-NOTICE: created irodsHome=/aliceZone/home/rods
-NOTICE: created irodsCwd=/aliceZone/home/rods
+NOTICE: created irodsHome=/eveZone/home/di4r-user1
+NOTICE: created irodsCwd=/eveZone/home/di4r-user1
 ```
-The ".irods.irods_environment.json" stores the data that you just provided to login. Next time you login iRODS will check this file, so you do not have to provide these details again.
+
+The ".irods.irods_environment.json" stores the data that you just provided to login. Next time you login iRODS will check t	his file, so you do not have to provide these details again.
 
 Have a look at the iRODS session environment:
+**CORRECT THE PATH and ubunto USER**
 
 ```
 cat /home/ubuntu/.irods/irods_environment.json
@@ -65,12 +76,24 @@ cat /home/ubuntu/.irods/irods_environment.json
 
 The file contains the minimal information for a session.
 
-With
-
-```
+With ```
 iuserinfo
 ```
-you can retrieve information on your account.
+command you can retrieve information on your account.
+
+```
+name: di4r-user1
+id: 10429
+type: rodsuser
+zone: eveZone
+info: 
+comment: 
+create time: 01492436109: 2017-04-17.15:35:09
+modify time: 01492436109: 2017-04-17.15:35:09
+member of group: public
+member of group: training
+member of group: di4r-user1
+```
 
 ### HELP
 
@@ -84,18 +107,29 @@ ihelp
 
 ### The working directory
 With the command 
-
 ```
 ils
 ```
 we can check whether there is data in our iRODS-home directory
 
 ```
-/aliceZone/home/alice:
+/eveZone/home/di4r-user1:
 ``` 
 
-- aliceZone: the name of the iRODS zone
+- eveZone: the name of the iRODS zone
 - `/home/<user>`: your default working directory 
+
+### iCommands
+iRODS command line equivalent to standard Unix operations
+
+- ils
+- icd
+- ipwd
+- iput
+- iget
+- imkdir
+- ihelp
+- irepl
 
 ## Data up and download (20 minutes)
 ### Create data
@@ -123,11 +157,11 @@ rm test.txt
 The file is now only available on the iRODS server:
 
 ```
-ils
-ubuntu@alice-server:~$ ils
-/aliceZone/home/rods:
+narges@login2:~$ ils
+/eveZone/home/di4r-user1:
   test.txt
 ```
+ 
 But not on the local linux system (check with `ls`).
 
 **Note:** the commands to steer iRODS are very similar to bash commands and can easily be confused!
@@ -141,15 +175,16 @@ irm <filename>
 ### Connection between logical and physical namespace
 iRODS provides an abstraction from the physical location of the files. I.e. `/aliceZone/home/rods/test.txt` is the logical path which only iRODS knows. But where is the file actually on the server that hosts iRODS?
 
+
 ```
-ils -L 
-/aliceZone/home/rods:
-  rods              0 demoResc           27 2017-02-23.16:05 & test.txt
-    a8216b70fd3c9049213be59a96ad6c15    generic    /irodsVault/home/rods/test.txt
+ils -L
+/eveZone/home/di4r-user1:
+  di4r-user1        0 demoResc           57 2017-04-25.13:58 & test.txt
+    1518e44d641ca6498316b5b6d6a584ae    generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/test.txt
 ```
 
 Aha, what does this mean?
-The file `test.txt` that we uploaded is known in iRODS as `/aliceZone/home/rods/test.txt`. It is owned by the user 'rods' and lies on the storage resource `demoResc` and there is no other replica of that file in the iRODS system (0 in front of 'demoResc'). The size of the file is 27KB. It is stored with a time stamp and a checksum. Actually, the checksum calculation was triggered by the option '-K' of the `iput` command.
+The file `test.txt` that we uploaded is known in iRODS as `/eveZone/home/di4r-user1/test.txt`. It is owned by the user `di4r-user1` and lies on the storage resource `demoResc` and there is no other replica of that file in the iRODS system (0 in front of 'demoResc'). The size of the file is 57KB. It is stored with a time stamp and a checksum (1518e4...84ae). Actually, the checksum calculation was triggered by the option '-K' of the `iput` command.
 
 ### Data download
 We deleted our local copy of our test file and want to restore it. We can download the version stored in iRODS with:
@@ -192,14 +227,14 @@ ils -L -r
 ```
 
 ```
-  C- /aliceZone/home/rods/MyColl
-/aliceZone/home/rods/MyColl:
-  rods              0 demoResc           27 2017-02-24.08:09 & test.txt
-    a8216b70fd3c9049213be59a96ad6c15    generic    
-    /irodsVault/home/rods/MyColl/test.txt
+  C- /eveZone/home/di4r-user1/lewiscarroll
+/eveZone/home/di4r-user1/lewiscarroll:
+  di4r-user1        0 demoResc       187870 2017-04-25.16:26 & aliceInWonderland-DE.txt.utf-8
+    7bdfc92a31784e0ca738704be4f9d088    generic    
+    /var/lib/irods/iRODS/Vault/home/di4r-user1/lewiscarroll/aliceInWonderland-DE.txt.utf-8
 ```
 
-You see that the logical iRODS collection '/aliceZone/home/rods/lewiscarroll' has the physical counterpart '/irodsVault/home/rods/lewiscarroll'. So data does not end up on the iRODS server randomly but follows a structure.
+`-C` stands for the collection (directory or folders) in iRODS. You see that the logical iRODS collection '/eveZone/home//di4r-user1/lewiscarroll' has the physical counterpart '/var/lib/irods/iRODS/Vault/home/di4r-user1/lewiscarroll/'. So data does not end up on the iRODS server randomly but follows a structure.
 
 We can also put data directly into an iRODS collection. Let us move the folder 'aliceInWonderland' in one go to iRODS under the collection 'lewiscarroll'
 
@@ -213,7 +248,7 @@ We need to use the flag `-r` for recursive upload and we gave a different name t
 - Move the German version of Alice in Wonderland to the sub collection 'book-aliceInWonderland'.
 
 ### Working directory
-All data that you uploaded so far went automatically to the logical iRODS collection '/aliceZone/home/rods/'. Why is that?
+All data that you uploaded so far went automatically to the logical iRODS collection '/eveZone/home/di4r-user1'. Why is that?
 
 You have a command
 
@@ -221,7 +256,7 @@ You have a command
 ipwd
 ```
 
-So if you do not specify a full path '/aliceZone/home/rods/<file>' but only a partial path e.g. 'lewiscarroll/file.txt' iRODS automatically uses the current working directory as a prefix.
+So if you do not specify a full path '/eveZone/home/di4r-user1/<file>' but only a partial path e.g. 'lewiscarroll/file.txt' iRODS automatically uses the current working directory as a prefix.
 
 You can change your current working directory with
 
@@ -254,7 +289,11 @@ icd lewiscarroll
  For experts (outlook to the next section):
 5. How can you grant access to the data in your collection?
 
+
+
 ## Access control and data sharing (20min)
+**THIS PART TO BE REMOVED**
+
 Check the current access of your data with
 
 ```
