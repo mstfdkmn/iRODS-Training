@@ -1,13 +1,13 @@
 # iRODS training (2 hours)
 ## Connect to iRODS (10 minutes)
 Goal: We will see how to connect to an iRODS instance and will have a look at the environment.
-Login to your Lisa account (sdemo_\<XXX> accounts). 
+Login to Lisa with your **sdemo\<XXX>** accounts. 
 
 ```
-ssh sdemo_<XXX>@lisa.surfsara.nl
+ssh sdemo003@lisa.surfsara.nl
 ```
 
-Then load the icommands module on Lisa. This module provides the commandline tool s with which you can connect to iRODS, send data to and download from iRODS etc.
+Then load the icommands module on Lisa. This module provides the commandline tools with which you can connect to iRODS.
 
 
 ```
@@ -15,7 +15,7 @@ module load icommands
 ```
 
 ### Connection
-On lisa machine type in
+To connect to iRODS from your Lisa type in
 
 ```
 iinit
@@ -29,6 +29,9 @@ Enter the port number: 1247
 Enter your irods user name: <irodsuser>
 Enter your irods zone: <zonename>
 ```
+
+Provide the required information as below: 
+
 - For **host name (DNS) of the server** use: **145.100.58.46**
 - For **port number** use: **1247**
 - For **irods user name** use: **di4r-user\<X>**
@@ -46,9 +49,11 @@ With the command
 ienv
 ```
 you can check how the iRODS zone is composed
-**CHANGE THE narges USER with sdemo USERS and correct the path**
+
 
 ```
+ienv
+
 NOTICE: Release Version = rods4.1.10, API Version = d
 NOTICE: irods_session_environment_file - 
 	/home/narges/.irods/irods_environment.json.10301
@@ -68,10 +73,9 @@ NOTICE: created irodsCwd=/eveZone/home/di4r-user1
 The ".irods.irods_environment.json" stores the data that you just provided to login. Next time you login iRODS will check t	his file, so you do not have to provide these details again.
 
 Have a look at the iRODS session environment:
-**CORRECT THE PATH and ubunto USER**
 
 ```
-cat /home/ubuntu/.irods/irods_environment.json
+cat /home/narges/.irods/irods_environment.json
 ```
 
 The file contains the minimal information for a session.
@@ -102,24 +106,11 @@ ihelp
 `ihelp iuserinfo` or `iuserinfo -h`
 
 
-### The working directory
 
-With the command 
-```
-ils
-```
-we can check whether there is data in our iRODS-home directory
 
-```
-/eveZone/home/di4r-user1:
-``` 
+## iCommands
 
-- eveZone: the name of the iRODS zone
-- `/home/<user>`: your default working directory 
-
-### iCommands
-
-iRODS command line equivalent to standard Unix operations
+iRODS command line is equivalent to standard Unix operations
 
 - ils
 - icd
@@ -129,6 +120,73 @@ iRODS command line equivalent to standard Unix operations
 - imkdir
 - ihelp
 - irepl
+
+### The working directory
+
+With the command 
+```
+ils
+```
+we can check whether there is data in our iRODS-home directory.
+
+- eveZone: the name of the iRODS zone
+- `/home/<user>`: your default working directory 
+
+```
+/eveZone/home/di4r-user1:
+``` 
+
+Make a new subcollection workdir
+
+```
+imkdir t1
+``` 
+
+Make t1 the current default working directory
+
+```
+icd t1
+``` 
+Lets create a file on your Lisa machine and store the file into the iRODS workind directory 
+
+```
+touch file1
+iput file1
+``` 
+Show the files in iRODS, that is the logical file names
+
+```
+ils
+/eveZone/home/di4r-user1/t1:
+  file1
+```
+Show more detail, including the logical resource name
+
+```
+ils -l
+/eveZone/home/di4r-user1/t1:
+  di4r-user1        0 demoResc            0 2017-05-02.12:46 & file1
+```
+
+Show more detail, including the physical path where the file was stored
+
+```
+ils -L
+/eveZone/home/di4r-user1/t1:
+  di4r-user1        0 demoResc            0 2017-05-02.12:46 & file1
+        generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/t1/file1
+```
+What does the output of `ils -L` mean? 
+
+The file test.txt that we uploaded is known in iRODS as /eveZone/home/di4r-user1/test.txt. 
+ 
+- The first item is the name of the owner of the file (in this case, “di4r-user1”).
+- The second item is the replication number, which is the number of replicas of the file in different physical locations. (In this case, '0') 
+- The third item is the Logical Resource Name (In this case, 'demoResc'). 
+- The fourth item is the size of the file in bytes (in this case, '0'). 
+- The fifth item is the date. 
+- The sixth item (“&”) indicates the file is up-to-date. If a replica is modified, the “&” flag is removed from the out-of-date copies.
+- When iRODS stored a copy of the file onto the storage resource “demoResc”, the copy was made at the physical location: `/var/lib/irods/iRODS/Vault/home/di4r-user1/t1/file1`
 
 ## Data up and download (20 minutes)
 
@@ -312,26 +370,31 @@ ils -r -A lewiscarroll
 ```
 
 ```
-/aliceZone/home/di4r-user1/lewiscarroll:
-        ACL - di4r-user1#aliceZone:own
+/eveZone/home/di4r-user1/lewiscarroll:
+        ACL - di4r-user1#eveZone:own   
         Inheritance - Disabled
-  C- /aliceZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland
-/aliceZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland:
-        ACL - di4r-user1#aliceZone:own
+  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland
+/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland:
+        ACL - di4r-user1#eveZone:own   
         Inheritance - Disabled
   aliceInWonderland-DE.txt.utf-8
-        ACL - di4r-user1#aliceZone:own
+        ACL - di4r-user1#eveZone:own   
+  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland
+/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland:
+        ACL - di4r-user1#eveZone:own   
+        Inheritance - Disabled
   aliceInWonderland-EN.txt.utf-8
-        ACL - di4r-user1#aliceZone:own
+        ACL - di4r-user1#eveZone:own   
   aliceInWonderland-IT.txt.utf-8
-        ACL - di4r-user1#aliceZone:own
+        ACL - di4r-user1#eveZone:own   
 ```
 
-The collection and all its data is owned by the user 'rods'. Noone else has access rights.
+
+The collection and all its data is owned by the user 'di4r-user1'. No one else has access rights.
 
 Collections have a flag 'Inheritance'. If this flag is set to true, all content of the folder will inherit the accession rights from the folder.
 
-Let us change the accession rights of 'lewiscarroll'. Choose another irods user who you want to give access (as your neighbour team):
+Let us change the accession rights of 'lewiscarroll'. Choose another irods user (i.e. user 'di4r-user2') who you want to give access (as your neighbour team):
 
 ```
 ichmod read di4r-user2 lewiscarroll
@@ -340,21 +403,25 @@ ichmod read di4r-user2 lewiscarroll
 The user 'di4r-user1' can list the collection and see the data to which he has the respective permission.
 
 ```
-ils -Ar lewiscarroll
+ils -r -A lewiscarroll
 
-/aliceZone/home/di4r-user1/lewiscarroll:
-        ACL - di4r-user1#aliceZone:own   di4r-user2#aliceZone:read object
+/eveZone/home/di4r-user1/lewiscarroll:
+        ACL - di4r-user1#eveZone:own   di4r-user2#eveZone:read object   
         Inheritance - Disabled
-  C- /aliceZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland
-/aliceZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland:
-        ACL - di4r-user1#aliceZone:own
+  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland
+/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland:
+        ACL - di4r-user1#eveZone:own   
         Inheritance - Disabled
   aliceInWonderland-DE.txt.utf-8
-        ACL - di4r-user1#aliceZone:own
+        ACL - di4r-user1#eveZone:own   
+  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland
+/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland:
+        ACL - di4r-user1#eveZone:own   
+        Inheritance - Disabled
   aliceInWonderland-EN.txt.utf-8
-        ACL - di4r-user1#aliceZone:own
+        ACL - di4r-user1#eveZone:own   
   aliceInWonderland-IT.txt.utf-8
-        ACL - di4r-user1#aliceZone:own
+        ACL - di4r-user1#eveZone:own  
 ```
 
 Change the inheritance and place some new data in the collection:
@@ -369,14 +436,39 @@ ils -A -r lewiscarroll
 ```
 Only the newly placed file will inherit the ACLs from the folder. Old data will keep their ACLs.
 
+```
+ils -r -A lewiscarroll
+
+/eveZone/home/di4r-user1/lewiscarroll:
+        ACL - di4r-user1#eveZone:own   di4r-user2#eveZone:read object   
+        Inheritance - Enabled
+  test1.txt
+        ACL - di4r-user1#eveZone:own   di4r-user2#eveZone:read object   
+  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland
+/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland:
+        ACL - di4r-user1#eveZone:own   
+        Inheritance - Disabled
+  aliceInWonderland-DE.txt.utf-8
+        ACL - di4r-user1#eveZone:own   
+  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland
+/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland:
+        ACL - di4r-user1#eveZone:own   
+        Inheritance - Disabled
+  aliceInWonderland-EN.txt.utf-8
+        ACL - di4r-user1#eveZone:own   
+  aliceInWonderland-IT.txt.utf-8
+        ACL - di4r-user1#eveZone:own  
+```
+
 ### Small exercise
 
+**THIS PART TO BE REMOVED**
 
 1. Pair up with another team.
 2. Make one of your collections or subcollections accessible to other team
 3. Switch on the inheritance
 4. Put some data in the folder (`imv` or `icp` some data that is already in iRODS)
-5. Use `iget` and try to download the data your partnering team gave access to  
+5. Use `iget` and try to download the data your partnering team gave access to.  
 
 ## Metadata (30 minutes)
 
@@ -385,6 +477,9 @@ In the previous section we up and downloaded data to an iRODS server and set per
 What does iRODS offer to the user that exceeds such functionality?
 
 ### Create Attribute, Value, Unit triples
+
+
+Metadata attribute-value-units triples (AVUs) consist of an Attribute-Name, Attribute-Value, and an optional Attribute-Units.  
 
 We can annotate files with so-called AVUs triples. These triples are added to a database and are searchable, e.g. you can ask the iRODS system give me all data (files and collections) whose author is "Alice" and which were created in 2016.
 
@@ -406,6 +501,8 @@ First we will explore how to create these cues for which we can search later.
  ```
  imeta add -C lewiscarroll 'collection' 'books' 
  ```
+
+With `imeta add` you can add metadata to dataobjects (iRODS files) or collections (iRODS folders). For each command, -d, -C, -R, or -u is used to specify which type of object to work with: dataobjs, collections, resources, or users.
  
 ### List metadata
 
