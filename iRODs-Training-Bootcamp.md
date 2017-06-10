@@ -1,10 +1,27 @@
-# iRODS training (2 hours)
-## Connect to iRODS (10 minutes)
+# iRODS training Handon (1.5 hours)
+
+
+Contents:
+
+- Connect to iRODS (15 minutes)
+- Explore iCommands (15 mins)
+- Data up and download (15 minutes)
+- Structuring data and Access control (15 minutes)
+- Metadata (30 minutes)
+
+Pre-requistics:
+
+- Terminal or SSH client (On Windows machines install MobaXterm or PuTTY)
+-  username and password to login to a UNIX system (Lisa).
+-  username and password to login to iRODs server
+
+## Connect to iRODS (15 minutes)
 Goal: We will see how to connect to an iRODS instance and will have a look at the environment.
-Login to Lisa with your **sdemo\<XXX>** accounts. 
+
+Login to Lisa with your **sdemo\<XXX>** accounts. (replace login 'narges' with your own sdemo login) 
 
 ```
-ssh sdemo003@lisa.surfsara.nl
+ssh narges@lisa.surfsara.nl
 ```
 
 Then load the icommands module on Lisa. This module provides the commandline tools with which you can connect to iRODS.
@@ -15,12 +32,12 @@ module load icommands
 ```
 
 ### Connection
-To connect to iRODS from your Lisa type in
+To connect to an iRODS server from Lisa, type in
 
 ```
 iinit
 ```
-
+This initialize a session, so you don't need to retype your password evry time.
 The system will ask you for information where to connect to:
 
 ```
@@ -40,7 +57,7 @@ Provide the required information as below:
 
 Provide your password and .. there you are logged in.
 
-If you are logging-in for the second time, you only need to provide your password to connect to the iRODS zone.
+If you are logging-in for the second time, you only need to provide your password to connect to the iRODS zone. The information about the server, port number,... will be saved in a hidden file (.irods) in your home directory on Lisa.
 
 ### Environment
 
@@ -70,17 +87,17 @@ NOTICE: created irodsHome=/eveZone/home/di4r-user1
 NOTICE: created irodsCwd=/eveZone/home/di4r-user1
 ```
 
-The ".irods.irods_environment.json" stores the data that you just provided to login. Next time you login iRODS will check t	his file, so you do not have to provide these details again.
+The ".irods/irods_environment.json" stores the data that you just provided to login. Next time you login iRODS will check this file, so you do not have to provide these details again.
 
 Have a look at the iRODS session environment:
 
 ```
 cat /home/narges/.irods/irods_environment.json
 ```
-
 The file contains the minimal information for a session.
 
-With `iuserinfo` command you can retrieve information on your account.
+
+Command `iuserinfo` shows information about your iRODS user account.
 
 ```
 name: di4r-user1
@@ -108,7 +125,7 @@ ihelp
 
 
 
-## iCommands
+## Explore iCommands (15 mins)
 
 iRODS command line is equivalent to standard Unix operations
 
@@ -121,22 +138,67 @@ iRODS command line is equivalent to standard Unix operations
 - ihelp
 - irepl
 
+You can see the list of full iRODS commands by typing:
+
+```
+ihelp
+```
+
 ### The working directory
 
-With the command 
+With the command `ils` we can check whether there is data in our iRODS-home directory.
+
 ```
 ils
-```
-we can check whether there is data in our iRODS-home directory.
-
+/eveZone/home/di4r-user1:
+``` 
 - eveZone: the name of the iRODS zone
 - `/home/<user>`: your default working directory 
 
+
+Lets create a file on your Lisa machine and quickly store in on the iRODS server: 
+
 ```
-/eveZone/home/di4r-user1:
+touch test1
+iput test1
 ``` 
 
-Make a new subcollection workdir
+With the `ils` command we can see the file on iRODS (logical file names)
+
+```
+ils
+/eveZone/home/di4r-user1:
+  test1
+```
+Command `ils -l` shows more detail, including the logical resource name
+
+```
+ils -l
+/eveZone/home/di4r-user1:
+  di4r-user1        0 demoResc            0 2017-06-09.16:46 & test1
+```
+
+Command `ils -L` shows even more detail, including the physical path where the file was stored
+
+```
+ils -L
+/eveZone/home/di4r-user1:
+  di4r-user1        0 demoResc            0 2017-06-09.16:46 & test1
+        generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/test1
+```
+What does the output of `ils -L` mean? 
+
+The file test that we uploaded is known in iRODS as `/eveZone/home/di4r-user1/test1`. 
+ 
+- The first item is the name of the owner of the file (in this case, “di4r-user1”).
+- The second item is the replication number, which is the number of replicas of the file in different physical locations. (In this case, '0') 
+- The third item is the Logical Resource Name (In this case, 'demoResc'). 
+- The fourth item is the size of the file in bytes (in this case, '0'). 
+- The fifth item is the date. 
+- The sixth item (“&”) indicates the file is up-to-date. If a replica is modified, the “&” flag is removed from the out-of-date copies.
+- When iRODS stored a copy of the file onto the storage resource “demoResc”, the copy was made at the physical location: `/var/lib/irods/iRODS/Vault/home/di4r-user1/test1`
+
+Make a new subcollection (or directory) on iRODS:
 
 ```
 imkdir t1
@@ -147,67 +209,69 @@ Make t1 the current default working directory
 ```
 icd t1
 ``` 
-Lets create a file on your Lisa machine and store the file into the iRODS workind directory 
+
+Now, lets make another file and store it on iRODS:
 
 ```
-touch file1
-iput file1
+touch test2
+iput test2
 ``` 
-Show the files in iRODS, that is the logical file names
+Now. let make an `ils -L` to see where the file is stores on iRODS:
 
 ```
-ils
+ ils -L
 /eveZone/home/di4r-user1/t1:
-  file1
+  di4r-user1        0 demoResc            0 2017-06-02.10:56 & test2
+        generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/t1/test2
 ```
-Show more detail, including the logical resource name
+The file you upload to iRODS will be put in your working directory.
+Lets check our current working directory:
 
 ```
-ils -l
-/eveZone/home/di4r-user1/t1:
-  di4r-user1        0 demoResc            0 2017-05-02.12:46 & file1
+ipwd
+/eveZone/home/di4r-user1/t1
 ```
 
-Show more detail, including the physical path where the file was stored
+Lets move back to the home directory
 
 ```
-ils -L
-/eveZone/home/di4r-user1/t1:
-  di4r-user1        0 demoResc            0 2017-05-02.12:46 & file1
-        generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/t1/file1
+icd ..
+
 ```
-What does the output of `ils -L` mean? 
 
-The file test.txt that we uploaded is known in iRODS as /eveZone/home/di4r-user1/test.txt. 
- 
-- The first item is the name of the owner of the file (in this case, “di4r-user1”).
-- The second item is the replication number, which is the number of replicas of the file in different physical locations. (In this case, '0') 
-- The third item is the Logical Resource Name (In this case, 'demoResc'). 
-- The fourth item is the size of the file in bytes (in this case, '0'). 
-- The fifth item is the date. 
-- The sixth item (“&”) indicates the file is up-to-date. If a replica is modified, the “&” flag is removed from the out-of-date copies.
-- When iRODS stored a copy of the file onto the storage resource “demoResc”, the copy was made at the physical location: `/var/lib/irods/iRODS/Vault/home/di4r-user1/t1/file1`
+Data can be deleted with the command `irm <filename>`
 
-## Data up and download (20 minutes)
+```
+irm test1
+```
+To delete an irods collection (directory):
+
+```
+irm -r t1
+```
+
+**Note:** the commands to steer iRODS are very similar to bash commands and can easily be confused! 
+
+## Data up and download (15 minutes)
 
 ### Create data
 
-Open a file with `nano` on the linux filesystem
+Open a file with `nano <filename>` on the linux filesystem
 
 ```
-nano <filename>
+nano test.txt
 ```
 
 ### Data upload
 
-With the linux command `ls` you can check that the file has been created and is accessible on the User Interface machine:
+With the linux command `ls` you can check that the file has been created and is accessible on the User Interface machine (Lisa):
 
 ```
 ls 
 test.txt
 ```
 
-We now upload the data to the iRODS server and remove the original file:
+We now upload the data to the iRODS server and remove the original file (-K option triggers checksum calculation):
 
 ```
 iput -K test.txt
@@ -217,35 +281,29 @@ rm test.txt
 The file is now only available on the iRODS server:
 
 ```
-narges@login2:~$ ils
+ils
 /eveZone/home/di4r-user1:
   test.txt
 ```
  
 But not on the local linux system (check with `ls`).
 
-**Note:** the commands to steer iRODS are very similar to bash commands and can easily be confused!
 
-Data can be deleted with the command:
-
-```
-irm <filename>
-```
 
 ### Connection between logical and physical namespace
 
-iRODS provides an abstraction from the physical location of the files. I.e. `/aliceZone/home/rods/test.txt` is the logical path which only iRODS knows. But where is the file actually on the server that hosts iRODS?
-
+iRODS provides an abstraction from the physical location of the files. I.e. `/eveZone/home/di4r-user1/test.txt` is the logical path which only iRODS knows. But where is the file actually on the server that hosts iRODS?
+test
 
 ```
 ils -L
 /eveZone/home/di4r-user1:
-  di4r-user1        0 demoResc           57 2017-04-25.13:58 & test.txt
-    1518e44d641ca6498316b5b6d6a584ae    generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/test.txt
+  di4r-user1        0 demoResc           27 2017-06-09.16:53 & test.txt
+    4f70b054700b222f04674c65d8f749ec    generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/test.txt
 ```
 
-Aha, what does this mean?
-The file `test.txt` that we uploaded is known in iRODS as `/eveZone/home/di4r-user1/test.txt`. It is owned by the user `di4r-user1` and lies on the storage resource `demoResc` and there is no other replica of that file in the iRODS system (0 in front of 'demoResc'). The size of the file is 57KB. It is stored with a time stamp and a checksum (1518e4...84ae). Actually, the checksum calculation was triggered by the option '-K' of the `iput` command.
+What does this mean?
+The file `test.txt` that we uploaded is known in iRODS as `/eveZone/home/di4r-user1/test.txt`. It is owned by the user `di4r-user1` and lies on the storage resource `demoResc` and there is no other replica of that file in the iRODS system (0 in front of 'demoResc'). The size of the file is 27KB. It is stored with a time stamp and a checksum (4f70b0...749ec). Actually, the checksum calculation was triggered by the option '-K' of the `iput` command.
 
 ### Data download
 
@@ -261,11 +319,12 @@ We downloaded test.txt and renamed our local copy to test-restore.txt. With the 
 
 ### Small exercise:
 
-- Store the German version of Alice in wonderland `aliceInWonderland-DE.txt.utf-8` on iRODS.
-- Verify that the checksum in iRODS is the same as for your local file. You can calculate the checksum in linux with `md5sum aliceInWonderland-DE.txt.utf-8`.
+- Verify that the checksum in iRODS is the same as for your local file. You can calculate the checksum in linux with `md5sum` command.
+
+Run `md5sum test-restore.txt`
 
 
-## Structuring data in iRODS (20 minutes)
+## Structuring data & Access Control (15 minutes)
 
 On a normal PC you would create folder structures to keep the overview over your data. In iRODS you can also create folders, however, they are called collections.
 
@@ -274,61 +333,65 @@ In iRODS you have the commands `imkdir` and `imv`.
 To create an iRODS collection:
 
 ```
-imkdir lewiscarroll
+imkdir books
 ```
 
-Now let us move our test file to that collection and list the contents of the collection
+Now lets download a file to your linux account:
+
+```wget http://www.gutenberg.org/files/52521/52521-0.txt```
+
+Upload it to iRODS using `iput` command.
 
 ```
-imv aliceInWonderland-DE.txt.utf-8 lewiscarroll
-ils -L lewiscarroll
+iput -K 52521-0.txt
+```
+ 
+Where is it uploaded? 
+
+```
+ils
+/eveZone/home/di4r-user1:
+  52521-0.txt
+  test.txt
+  C- /eveZone/home/di4r-user1/books
+```
+  
+Now let us move our test file to the books collection and list the contents of the collection
+
+```
+imv 52521-0.txt books
+ils -L books
 ```
 
-or list the whole home directory recursively
+or list the whole home directory recursively `ils -L -r`
 
 ```
 ils -L -r
-```
+/eveZone/home/di4r-user1:
+  di4r-user1        0 demoResc           37 2017-06-09.17:20 & test.txt
+    751d08e828a38291381a059595d555dd    generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/test.txt
+  C- /eveZone/home/di4r-user1/books
+/eveZone/home/di4r-user1/books:
+  di4r-user1        0 demoResc       522843 2017-06-09.17:37 & 52521-0.txt
+    c1d33293b8c86258fe7d9a050a6e2145    generic    /var/lib/irods/iRODS/Vault/home/di4r-user1/books/52521-0.txt
 
 ```
-  C- /eveZone/home/di4r-user1/lewiscarroll
-/eveZone/home/di4r-user1/lewiscarroll:
-  di4r-user1        0 demoResc       187870 2017-04-25.16:26 & aliceInWonderland-DE.txt.utf-8
-    7bdfc92a31784e0ca738704be4f9d088    generic    
-    /var/lib/irods/iRODS/Vault/home/di4r-user1/lewiscarroll/aliceInWonderland-DE.txt.utf-8
-```
 
-`-C` stands for the collection (directory or folders) in iRODS. You see that the logical iRODS collection '/eveZone/home//di4r-user1/lewiscarroll' has the physical counterpart '/var/lib/irods/iRODS/Vault/home/di4r-user1/lewiscarroll/'. So data does not end up on the iRODS server randomly but follows a structure.
+`-C` stands for the collection (directory or folders) in iRODS. You see that the logical iRODS collection '/eveZone/home/di4r-user1/books' has the physical counterpart '/var/lib/irods/iRODS/Vault/home/di4r-user1/books/'. So data does not end up on the iRODS server randomly but follows a structure.
 
-We can also put data directly into an iRODS collection. Let us move the folder 'aliceInWonderland' in one go to iRODS under the collection 'lewiscarroll'
+We can also put data directly into an iRODS collection. Lets create a directory in our local unix machine and move the folder to iRODS under the collection 'books' in one go.
 
 ```
-iput -K -r aliceInWonderland lewiscarroll/book-aliceInWonderland
+mkdir mathbooks
+cd mathbooks
+touch file1 file2 file3
+cd ..
+
+iput -K -r mathbooks books/mathbooks
 ```
 
 We need to use the flag `-r` for recursive upload and we gave a different name to the folder in iRODS.
 
-### Small exercise
-
-- Move the German version of Alice in Wonderland to the sub collection 'book-aliceInWonderland'.
-
-### Working directory
-
-All data that you uploaded so far went automatically to the logical iRODS collection '/eveZone/home/di4r-user1'. Why is that?
-
-You have a command
-
-```
-ipwd
-```
-
-So if you do not specify a full path '/eveZone/home/di4r-user1/<file>' but only a partial path e.g. 'lewiscarroll/file.txt' iRODS automatically uses the current working directory as a prefix.
-
-You can change your current working directory with
-
-```
-icd lewiscarroll
-```
 
 ### Small exercise:
 
@@ -344,6 +407,7 @@ icd lewiscarroll
 - Change your working directory again to your iRODS home collection. Verify with ipwd!!!
 - Remove test-restore.txt from iRODS (but not from your linux home!)
 
+<!--
 ## Exercise: Moving data in iRODS (10 minutes)
 
 1. Create a new collection for another author under you iRODS home collection.
@@ -356,37 +420,35 @@ icd lewiscarroll
 
  For experts (outlook to the next section):
 5. How can you grant access to the data in your collection?
+-->
 
 
+## Access control
 
-## Access control and data sharing (20min)
-
-**THIS PART TO BE REMOVED**
 
 Check the current access of your data with
 
 ```
-ils -r -A lewiscarroll
+ils -r -A books
 ```
 
 ```
-/eveZone/home/di4r-user1/lewiscarroll:
+ils -r -A books
+/eveZone/home/di4r-user1/books:
         ACL - di4r-user1#eveZone:own   
         Inheritance - Disabled
-  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland
-/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland:
+  52521-0.txt
+        ACL - di4r-user1#eveZone:own   
+  C- /eveZone/home/di4r-user1/books/mathbooks
+/eveZone/home/di4r-user1/books/mathbooks:
         ACL - di4r-user1#eveZone:own   
         Inheritance - Disabled
-  aliceInWonderland-DE.txt.utf-8
+  file1
         ACL - di4r-user1#eveZone:own   
-  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland
-/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland:
+  file2
         ACL - di4r-user1#eveZone:own   
-        Inheritance - Disabled
-  aliceInWonderland-EN.txt.utf-8
-        ACL - di4r-user1#eveZone:own   
-  aliceInWonderland-IT.txt.utf-8
-        ACL - di4r-user1#eveZone:own   
+  file3
+        ACL - di4r-user1#eveZone:own    
 ```
 
 
@@ -394,37 +456,40 @@ The collection and all its data is owned by the user 'di4r-user1'. No one else h
 
 Collections have a flag 'Inheritance'. If this flag is set to true, all content of the folder will inherit the accession rights from the folder.
 
-Let us change the accession rights of 'lewiscarroll'. Choose another irods user (i.e. user 'di4r-user2') who you want to give access (as your neighbour team):
+Let us change the accession rights of 'books'. Choose another irods user (i.e. user 'di4r-user2') who you want to give access (as your neighbour team):
 
 ```
-ichmod read di4r-user2 lewiscarroll
+ichmod read di4r-user2 books
 ```
 
 The user 'di4r-user1' can list the collection and see the data to which he has the respective permission.
 
 ```
-ils -r -A lewiscarroll
-
-/eveZone/home/di4r-user1/lewiscarroll:
+ils -r -A
+/eveZone/home/di4r-user1:
+        ACL - di4r-user1#eveZone:own   
+        Inheritance - Disabled
+  test.txt
+        ACL - di4r-user1#eveZone:own   
+  C- /eveZone/home/di4r-user1/books
+/eveZone/home/di4r-user1/books:
         ACL - di4r-user1#eveZone:own   di4r-user2#eveZone:read object   
         Inheritance - Disabled
-  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland
-/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland:
+  52521-0.txt
+        ACL - di4r-user1#eveZone:own   
+  C- /eveZone/home/di4r-user1/books/mathbooks
+/eveZone/home/di4r-user1/books/mathbooks:
         ACL - di4r-user1#eveZone:own   
         Inheritance - Disabled
-  aliceInWonderland-DE.txt.utf-8
+  file1
         ACL - di4r-user1#eveZone:own   
-  C- /eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland
-/eveZone/home/di4r-user1/lewiscarroll/book-aliceInWonderland/aliceInWonderland:
+  file2
         ACL - di4r-user1#eveZone:own   
-        Inheritance - Disabled
-  aliceInWonderland-EN.txt.utf-8
+  file3
         ACL - di4r-user1#eveZone:own   
-  aliceInWonderland-IT.txt.utf-8
-        ACL - di4r-user1#eveZone:own  
 ```
 
-Change the inheritance and place some new data in the collection:
+<!-- Change the inheritance and place some new data in the collection:
 
 ```
 ichmod inherit lewiscarroll
@@ -470,6 +535,8 @@ ils -r -A lewiscarroll
 4. Put some data in the folder (`imv` or `icp` some data that is already in iRODS)
 5. Use `iget` and try to download the data your partnering team gave access to.  
 
+-->
+
 ## Metadata (30 minutes)
 
 In the previous section we up and downloaded data to an iRODS server and set permissions. So far it is nothig special compared to a normal (unix) filesystem apart from the strange commands.
@@ -483,7 +550,7 @@ Metadata attribute-value-units triples (AVUs) consist of an Attribute-Name, Attr
 
 We can annotate files with so-called AVUs triples. These triples are added to a database and are searchable, e.g. you can ask the iRODS system give me all data (files and collections) whose author is "Alice" and which were created in 2016.
 
-First we will explore how to create these cues for which we can search later.
+First we will explore how to create these metadata for which we can search later.
 
 - Annotate a data file:
  
@@ -499,7 +566,7 @@ First we will explore how to create these cues for which we can search later.
 - Annotate a collection 
  
  ```
- imeta add -C lewiscarroll 'collection' 'books' 
+imeta add -C books 'collection' 'books' 
  ```
 
 With `imeta add` you can add metadata to dataobjects (iRODS files) or collections (iRODS folders). For each command, -d, -C, -R, or -u is used to specify which type of object to work with: dataobjs, collections, resources, or users.
@@ -514,7 +581,7 @@ imeta ls -d test.txt
 and
 
 ```
-imeta ls -C lewiscarroll
+imeta ls -C books
 ```
 
 With `imeta ls` you can retrieve the AVUs when given a file or collection name. In the next Section we will see how we can retrieve the file and folder names when given an attribute or value.
@@ -535,67 +602,7 @@ Find a way to update the existing triple.
 Collapses all metadata entries with the same key to one with the new value.
 
 
-### Queries for data
-
-Previously we calculated a checksum. The checksum was stored in the iCAT metadata catalogue but we cannot fish it out with `imeta`. 
-To query the iCAT metadata catalogue we need another command, the `iquest` command.
-
-With this command we can fetch the data file, given e.g. the attribute 'author'.
-
-```
-iquest "select COLL_NAME, DATA_NAME, META_DATA_ATTR_VALUE where \
-META_DATA_ATTR_NAME like 'author'" 
-``` 
-
-And we can filter for a specific attribute values:
-
-```
-iquest "select COLL_NAME, DATA_NAME where \
-META_DATA_ATTR_NAME like 'author' and META_DATA_ATTR_VALUE like 'Alice'"
-```
-
-Or we can retrieve all data with a certain checksum:
-
-```
-iquest "select COLL_NAME, DATA_NAME, DATA_CHECKSUM where \
-DATA_CHECKSUM like 'a8216b70fd3c9049213be59a96ad6c15'"
-```
-
-```
-iquest "select COLL_NAME, DATA_NAME, DATA_CHECKSUM where DATA_NAME like '%test%'"
-```
-This quest will return all files with substring 'test' in file name.
-
-**NOTE**: the '%' is a wildcard. 
-
-There are a lot of predefined attributes that you can use in your searches:
-
-```
-iquest attrs
-```
-
-The most important ones are listed on your cheat-sheet.
-
-You might see that you get as a result several files. These are the files of your fellow course members. You can see and query the metadata pf these files and collections because you do have the correct ACLs.
-
-### Small exercise
-
-Command 	| Meaning
----------|--------
-iquest		| Find data by query on metadata
-iquest attrs	| List of attributes to query 
-			| USER\_ID, USER\_NAME, RESC\_ID, RESC\_NAME, RESC\_TYPE\_NAME, RESC\_CHILDREN, RESC\_PARENT, DATA\_NAME, DATA\_REPL\_NUM, DATA\_SIZE, DATA\_RESC\_NAME, DATA\_PATH, DATA\_OWNER\_NAME, DATA\_CHECKSUM, COLL\_ID, COLL\_NAME, COLL\_PARENT\_NAME, COLL\_OWNER\_NAME, META\_DATA\_ATTR\_NAME, META\_DATA\_ATTR\_VALUE, META\_DATA\_ATTR\_UNITS, META\_DATA\_ATTR\_ID, META\_COLL\_ATTR\_NAME, META\_COLL\_ATTR\_VALUE, META\_COLL\_ATTR\_UNITS, META\_COLL\_ATTR\_ID, META\_COLL\_CREATE\_TIME, META\_COLL\_MODIFY\_TIME, META\_NAMESPACE\_COLL, META\_RESC\_ATTR\_NAME, META\_RESC\_ATTR\_VALUE, META\_RESC\_ATTR\_UNITS
-
-
-- Pair up with another team.
-- Create some data and annotate the data, with own attributes and values.
-- Can you search for that data with `iquest` and the attribute-value pair? Can you find the data of your partnering team? 
-What does the team have to do to make you and only you see the metadata?
-- Do the permissions of the files have any influence on the metadata search?
-
-## Exercise: Find the easter bunny (20 min)
-
-- In the system there are some clues under the attribute 'Easter'. Gather the clues and download the easter bunny. 
+<!--
 
 ## iRODS resources (30 minutes, optional)
 
@@ -674,10 +681,6 @@ irm testfile.txt
 ```
 all replicas will be removed. The filename will only be removed from the logical namespace if there is no replica left.
 
-### Small exercise
-
-1. Replicate a file to three different resources
-2. Explore `itrim` and trim the number of replicas to 1 (1 original and 1 replica)
 
 ### Resources have a life of their own
 
@@ -710,10 +713,7 @@ Replication resource that automatically copies your data on two child resources.
 **Note** As an iRODS user you do not need to know which servers and storage systems are involved. 
 You only need an idea about the policies hidden behind grouped resources.
 
-
-
-
-
+-->
 
 
 
