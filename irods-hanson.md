@@ -261,6 +261,12 @@ Open a file with `nano <filename>` on the linux filesystem
 ```
 nano test.txt
 ```
+Type in some text"
+
+```
+This is a test file to put on irods
+```
+To exit, press `Ctrl+X`. Then type `Y` and then click `Enter` to save the changes.
 
 ### Data upload
 
@@ -326,7 +332,7 @@ Run `md5sum test-restore.txt`
 
 ## Structuring data & Access Control (15 minutes)
 
-On a normal PC you would create folder structures to keep the overview over your data. In iRODS you can also create folders, however, they are called collections.
+On a normal PC you would create folder structures and move files and folders to keep the overview over your data. In iRODS you can also create folders, however, they are called collections. You can also move dataobjects (files) and collections (folders) within iRODS.
 
 In iRODS you have the commands `imkdir` and `imv`.
 
@@ -587,11 +593,16 @@ imeta ls -C books
 
 ### Search files with metadata
 
-With `imeta qu` command you can search for dataobject with certain metadata. Lets fins dataobjects that have a distance metadata with value 36.
+iRODS metadata can be searched as well. A simple way to search is using the iRODS `imeta` command. With `imeta qu` command you can search for dataobject with certain metadata. Lets fins dataobjects that have an attribute 'distance' with value '36'.
 
 ```
 imeta qu -d 'distance' in '36'
 ```
+
+More complex queries can be generated using a subset of SQL operations issued through the `iquest` command.
+
+Once metadata is applied, it can be used in various ways. It can be used to trigger actions, based on rules defined in the iRODS rule engine. 
+ 
 
 ### Exercise: Create Metadata 
 
