@@ -1,4 +1,4 @@
-# iRODS training Handon (1.5 hours)
+# iRODS training Hands-on (1.5 hours)
 
 
 Contents:
@@ -573,7 +573,7 @@ With `imeta add` you can add metadata to dataobjects (iRODS files) or collection
  
 ### List metadata
 
-To list metadata do:
+With `imeta ls` you can retrieve the AVUs when given a file or collection name. In the next Section we will see how we can retrieve the file and folder names when given an attribute or value. To list metadata do:
 
 ```
 imeta ls -d test.txt
@@ -584,9 +584,16 @@ and
 imeta ls -C books
 ```
 
-With `imeta ls` you can retrieve the AVUs when given a file or collection name. In the next Section we will see how we can retrieve the file and folder names when given an attribute or value.
 
-### Exercise: Create Metadata (15min)
+### Search files with metadata
+
+With `imeta qu` command you can search for dataobject with certain metadata. Lets fins dataobjects that have a distance metadata with value 36.
+
+```
+imeta qu -d 'distance' in '36'
+```
+
+### Exercise: Create Metadata 
 
 1. Create the author Bob for the file test.txt
 2. Inspect the list of AVUs
