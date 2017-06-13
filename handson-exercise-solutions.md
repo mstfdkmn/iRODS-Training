@@ -55,8 +55,8 @@ imeta qu -d pages '>=' 20
  imeta ls -d test.txt
  imeta add -d test.txt 'distance' '36' 'miles'
  imeta mod -d test.txt distance 36 miles u:feet
-  imeta mod -d test.txt distance 12 meter v:44
-  imeta rm -d test.txt author Alice
+ imeta mod -d test.txt distance 12 meter v:44
+ imeta rm -d test.txt author Alice
 
 ```
  

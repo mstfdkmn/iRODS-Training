@@ -1,5 +1,5 @@
 # Hands-on iRODS training (1.5 hours)
-##(SURF Bootcamp TU/E)
+## (SURF Bootcamp TU/E)
 
 
 Contents:
