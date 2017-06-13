@@ -627,13 +627,13 @@ Once metadata is applied, it can be used in various ways. It can be used to trig
 
 ### Exercise 4: Create Metadata 
 
- - Go to collection 'books/mathbooks'
- - List the contents of the collection
- - Create the following metadata (AVU triple) for each file in this collection:
+ 1. Go to collection 'books/mathbooks'
+ 2. List the contents of the collection
+ 3. Create the following metadata (AVU triple) for each file in this collection:
  	- 'author' '\<author name>' 
  	- 'pages' '\<some number>' 
- - List all the metadata for 'file1'.
- - - Search for books that have more than 20 pages
+ 4. List all the metadata for 'file1'.
+ 5. Search for books that have more than 20 pages
 
 
 
