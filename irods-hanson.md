@@ -1,4 +1,5 @@
-# iRODS training Hands-on (1.5 hours)
+# Hands-on iRODS training (1.5 hours)
+##(SURF Bootcamp TU/E)
 
 
 Contents:
@@ -89,7 +90,7 @@ NOTICE: created irodsCwd=/eveZone/home/di4r-user1
 
 The ".irods/irods_environment.json" stores the data that you just provided to login. Next time you login iRODS will check this file, so you do not have to provide these details again.
 
-Have a look at the iRODS session environment:
+Have a look at the iRODS session environment (replace narges with your sdemoXXX login):
 
 ```
 cat /home/narges/.irods/irods_environment.json
@@ -323,11 +324,35 @@ We downloaded test.txt and renamed our local copy to test-restore.txt. With the 
 
 **Note,** iRODS can be used as external storage service, we can store extra system information, i.e. checksums which are used to verify data integrity upon data moving.
 
-### Small exercise:
+### Exercise 1:
 
-- Verify that the checksum in iRODS is the same as for your local file. You can calculate the checksum in linux with `md5sum` command.
+- Verify that the checksum in iRODS is the same as for your local file. You can calculate the checksum in linux with `md5sum` command. To create the checksum run:
 
-Run `md5sum test-restore.txt`
+```
+md5sum test-restore.txt
+```
+
+### Exercise 2:
+
+- Make sure you are in the home directory 
+- Make a collection (directory) on iRODS called 'f1'. 
+- Change your working directory to 'f1' 
+- put the file 'test-restore.txt' on iRODS 
+- Find the logical and physical paths of the file you just uploaded on iRODS. 
+- Remove test-restore.txt from iRODS (but not from your linux home!)
+- Change your working directory again to your iRODS home collection. Verify with ipwd!!!
+
+Hint: iCommands you might find useful:
+
+```
+icd
+icd ..
+ils
+imkdir
+iput
+irm
+ipwd
+```
 
 
 ## Structuring data & Access Control (15 minutes)
@@ -396,22 +421,13 @@ cd ..
 iput -K -r mathbooks books/mathbooks
 ```
 
-We need to use the flag `-r` for recursive upload and we gave a different name to the folder in iRODS.
+We need to use the flag `-r` for recursive upload and we gave a name to the folder in iRODS.
+
+### Exercise 3:
+Explore what happens if you don't provide a folder name on iRODS when uploading a directory? Run:
 
 
-### Small exercise:
 
-- What happens in the following two lines?
-
- ``` 
- ils -L
- ```
- ```
- iput -K test-restore.txt
- ```
-- How can you list your iRODS home directory now?
-- Change your working directory again to your iRODS home collection. Verify with ipwd!!!
-- Remove test-restore.txt from iRODS (but not from your linux home!)
 
 <!--
 ## Exercise: Moving data in iRODS (10 minutes)
@@ -572,7 +588,7 @@ First we will explore how to create these metadata for which we can search later
 - Annotate a collection 
  
  ```
-imeta add -C books 'collection' 'books' 
+imeta add -C books 'collection' 'book' 
  ```
 
 With `imeta add` you can add metadata to dataobjects (iRODS files) or collections (iRODS folders). For each command, -d, -C, -R, or -u is used to specify which type of object to work with: dataobjs, collections, resources, or users.
@@ -590,21 +606,39 @@ and
 imeta ls -C books
 ```
 
+### Search metadata
 
-### Search files with metadata
-
-iRODS metadata can be searched as well. A simple way to search is using the iRODS `imeta` command. With `imeta qu` command you can search for dataobject with certain metadata. Lets fins dataobjects that have an attribute 'distance' with value '36'.
+iRODS metadata can be searched as well. A simple way to search is using the iRODS `imeta` command. With `imeta qu` command you can query objects with matching AVUs. 
+Lets query across AVUs for the specified type of item, i.e. dataobjects that have an attribute 'distance' with value less than '30'.
 
 ```
-imeta qu -d 'distance' in '36'
+imeta qu -d distance '<=' 30
 ```
+Or
 
+```
+imeta qu -d author in Alice 
+```
 More complex queries can be generated using a subset of SQL operations issued through the `iquest` command.
 
 Once metadata is applied, it can be used in various ways. It can be used to trigger actions, based on rules defined in the iRODS rule engine. 
- 
 
-### Exercise: Create Metadata 
+
+
+### Exercise 4: Create Metadata 
+
+ - Go to collection 'books/mathbooks'
+ - List the contents of the collection
+ - Create the following metadata (AVU triple) for each file in this collection:
+ 	- 'author' '\<author name>' 
+ 	- 'pages' '\<some number>' 
+ - List all the metadata for 'file1'.
+ - - Search for books that have more than 20 pages
+
+
+
+
+### Exercise 5: Explore imeta command 
 
 1. Create the author Bob for the file test.txt
 2. Inspect the list of AVUs
@@ -614,10 +648,31 @@ Once metadata is applied, it can be used in various ways. It can be used to trig
 Find a way to update the existing triple.
 6. Remove the author Alice
 
- (For experts)
 
-7. What does `imeta set` do?
-Collapses all metadata entries with the same key to one with the new value.
+<!--
+# Aditional information (Advanced)
+## iRODS resources
+
+iRODS resources are pieces of a file system, external servers or software in which data can be stored.
+You can list all resources you have available with:
+
+```
+ilsresc
+``` 
+You will see the resource tree.
+
+```
+ilsresc 
+compResc:compound
+├── archiveResc:s3
+└── cacheResc
+demoResc
+```
+There are the storage resources: demoResc
+The resources archiveResc:s3 and cacheResc are managed by a coordinating resource called compound.
+
+If not further specified all your data will go to 'demoResc'.
+-->
 
 
 <!--
@@ -732,6 +787,8 @@ Replication resource that automatically copies your data on two child resources.
 You only need an idea about the policies hidden behind grouped resources.
 
 -->
+
+
 
 
 
